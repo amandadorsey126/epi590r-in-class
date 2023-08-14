@@ -1,8 +1,17 @@
+
+
+#
+
 nlsy_cols <- c("glasses", "eyesight", "sleep_wkdy", "sleep_wknd",
 							 "id", "nsibs", "samp", "race_eth", "sex", "region",
 							 "income", "res_1980", "res_2002", "age_bir")
 
+
 library(tidyverse)
+
+#This file fath is not on our computer, so this is bad for work flows
+#In general, don't use setwd()
+
 setwd("~/Documents/Teaching/Emory/epi590r-in-class/data/raw/")
 nlsy <- read_csv("nlsy.csv",
 								 na = c("-1", "-2", "-3", "-4", "-5", "-998"),
