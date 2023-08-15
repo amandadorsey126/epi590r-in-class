@@ -1,6 +1,5 @@
 
 
-#
 
 nlsy_cols <- c("glasses", "eyesight", "sleep_wkdy", "sleep_wknd",
 							 "id", "nsibs", "samp", "race_eth", "sex", "region",
@@ -29,3 +28,18 @@ nlsy <- na.omit(nlsy)
 
 setwd("../clean/")
 write_rds(nlsy, "nlsy-complete-cases.rds")
+
+
+############################################################################################
+#Try using here::here instead
+
+install.packages("here")
+
+#print your working directory with these 2 options. THey produce the same thing
+#Here:here will basically identify your FULL file path
+
+here::here()
+getwd()
+
+
+

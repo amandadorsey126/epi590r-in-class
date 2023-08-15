@@ -1,0 +1,156 @@
+---
+title: "Dorsey Quarto"
+format: html
+editor: visual
+---
+
+In the YAML above, you can set global settings:
+
+execute:
+
+{2 spaces} eval: false
+
+{2 spaces} echo: fale
+
+IN the YAML above, you can change the theme:
+
+format:
+
+{2 spaces} html:
+
+{4 spaces} theme: yeti
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+nlsy_cols <- c("glasses", "eyesight", "sleep_wkdy", "sleep_wknd", 
+               "id", "nsibs", "samp", "race_eth", "sex", "region", 
+               "income", "res_1980", "res_2002", "age_bir")
+nlsy <- read_csv(here::here("data", "raw", "nlsy.csv"), 
+                 na = c("-1", "-2", "-3", "-4", "-5", "-998"),
+                 skip = 1, col_names = nlsy_cols) |> 
+  mutate(region_cat = factor(region, labels = c("Northeast", "North Central", "South", "West")),
+         sex_cat = factor(sex, labels = c("Male", "Female")),
+         race_eth_cat = factor(race_eth, labels = c("Hispanic", "Black", "Non-Black, Non-Hispanic")),
+         eyesight_cat = factor(eyesight, labels = c("Excellent", "Very good", "Good", "Fair", "Poor")),
+         glasses_cat = factor(glasses, labels = c("No", "Yes"))) 
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+## Echo Options:
+
+-   `#| eval: false`: Don't evaluate this chunk! Really helpful if you're trying to isolate an error, or have a chunk that takes a long time
+
+-   `#| error: true`: Render this *even if* the chunk causes an error
+
+-   `#| cache: true`: Store the results of this chunk so that it doesn't need to re-run every time, as long as there are no changes
+
+-   `#| warning: false`: Don't print warnings
+
+-   `#| message: false`: Don't print messages
+
+## Quarto Tables, Figures and Stats
+
+```{r}
+#| label: tbl-one
+#| tbl-cap: "This is a great table"
+knitr::kable(mtcars)
+```
+
+```{r}
+#| label: fig-hist
+#| fig-cap: "This is a histogram" 
+hist(rnorm(100))
+```
+
+### You can cross reference text because of the chunks above
+
+@fig-hist is a histogram and @tbl-one is a table
+
+### Inline R
+
+You can run R code within the text:
+
+There were `r 3+4` participants.
+
+### Inline Stats
+
+```{r}
+#| error: true
+stats <- list(n =nrow(nlsy), mean_age = mean(nlsy$income))
+```
+
+There were `r stats$n` participants with a mean age of `r stats$mean_age`
+
+### Inline Stats from GTSummary
+
+<!-- inline_text(income_table, variable = "age_bir" -->
+
+```{r}
+#| label: tbl-descr
+#| tbl-cap: "Descriptive statistics"
+#| output-location: slide
+table1 <- tbl_summary(
+  nlsy,
+  by = sex_cat,
+  include = c(sex_cat, race_eth_cat, region_cat,
+              eyesight_cat, glasses, age_bir)) |> 
+  add_overall(last = TRUE)
+table1
+```
+
+```{r}
+#| error: true
+
+inline_text(table1, variable = "region_cat", level ="South", column = "Female" )
+
+inline_text(table1, variable = "glasses", column = "stat_0", pattern = "{n}/{N} ({p}%)")
+```
+
+## Exercise
+
+1.  Choose a table to label and caption, and then write a sentence that *cross-references* it (e.g., Table 1 shows the descriptive statistics)
+
+```{r}
+#| label: tbl-linearmod
+#| tbl-cap: "Univariate Relationship between sex and income"
+
+
+linear_model <- lm(income ~ sex_cat + age_bir + race_eth_cat, 
+                   data = nlsy)
+
+regmodel <- tbl_regression(
+  linear_model,
+  intercept = TRUE,
+  label = list(
+    sex_cat ~ "Sex",
+    race_eth_cat ~ "Race/ethnicity",
+    age_bir ~ "Age at first birth"
+  ))
+
+regmodel
+```
+
+@tbl-linearmod *shows the relationship between sex, age at first birth, and race/ethnicity with income.*
+
+There is a significant relationship between race and ethnicity and income `r inline_text(regmodel, variable = "race_eth_cat",  level = "Non-Black, Non-Hispanic", pattern = "({p.value})")`
